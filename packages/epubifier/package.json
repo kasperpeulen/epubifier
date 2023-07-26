@@ -1,0 +1,12 @@
+{
+	"main": "index.js",
+	"scripts": {
+		"test:pnpm": "npx tsx ./test/pnpm.io.ts"
+	},
+	"keywords": [],
+	"author": "Kasper Peulen",
+	"license": "MIT",
+	"dependencies": {
+		"tsx": "^3.12.7"
+	}
+}

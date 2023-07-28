@@ -5,6 +5,11 @@
     "test": "vitest run",
     "tsc": "tsc --noEmit"
   },
+  "dependencies": {
+    "hast-util-select": "^5.0.5",
+    "rehype-parse": "^8.0.4",
+    "unified": "^10.1.2"
+  },
   "devDependencies": {
     "tsx": "^3.12.7",
     "typescript": "^5.1.6",

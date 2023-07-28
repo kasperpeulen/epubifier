@@ -1,6 +1,7 @@
 {
-  "author": "Kasper Peulen",
+  "private": true,
   "type": "module",
+  "author": "Kasper Peulen",
   "license": "MIT",
   "devDependencies": {
     "prettier": "^3.0.0"

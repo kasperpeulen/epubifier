@@ -6,7 +6,9 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/hast": "^3.0.0",
     "hast-util-select": "^5.0.5",
+    "hast-util-to-text": "^3.1.2",
     "rehype-parse": "^8.0.4",
     "unified": "^10.1.2"
   },

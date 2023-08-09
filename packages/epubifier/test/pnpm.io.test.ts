@@ -1,25 +1,13 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 import { unified } from "unified";
 import rehypeParse from "rehype-parse";
 import { selectAll } from "hast-util-select";
 import { toText } from "hast-util-to-text";
 
 test("get links from page", async () => {
-  const html = await fetchHtml("https://pnpm.io/motivation");
-  const tree = unified().use(rehypeParse).parse(html);
+  const navSections = await getNavSections("https://pnpm.io/motivation");
 
-  // See: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/navigation_role
-  const elements = selectAll("nav:has(a), [role=navigation]:has(a)", tree);
-  const links = elements.map((node) => ({
-    label: node.properties?.ariaLabel,
-    links: selectAll("a", node).map(({ properties, children }) => ({
-      text: children.map((it) => toText(it)).join(" "),
-      expanded: properties?.ariaExpanded,
-      href: properties?.href,
-    })),
-  }));
-
-  expect(links).toMatchInlineSnapshot(`
+  expect(navSections).toMatchInlineSnapshot(`
     [
       {
         "label": "Main",
@@ -122,7 +110,7 @@ test("get links from page", async () => {
           {
             "expanded": undefined,
             "href": "/zh/motivation",
-            "text": "简体中文 (83%)",
+            "text": "简体中文 (84%)",
           },
           {
             "expanded": undefined,
@@ -278,7 +266,260 @@ test("get links from page", async () => {
       },
     ]
   `);
+
+  const docsNavSection = navSections.find((it) => it.label === "Docs sidebar");
+  if (docsNavSection == null) throw new Error();
+
+  const nonExpandedLinks = docsNavSection.links.filter((it) => it.expanded === "false");
+
+  expect(nonExpandedLinks).toMatchInlineSnapshot(`
+    [
+      {
+        "expanded": "false",
+        "href": "/pnpm-cli",
+        "text": "Usage",
+      },
+      {
+        "expanded": "false",
+        "href": "/cli/add",
+        "text": "CLI commands",
+      },
+      {
+        "expanded": "false",
+        "href": "/package_json",
+        "text": "Configuration",
+      },
+      {
+        "expanded": "false",
+        "href": "/workspaces",
+        "text": "Features",
+      },
+      {
+        "expanded": "false",
+        "href": "/using-changesets",
+        "text": "Recipes",
+      },
+      {
+        "expanded": "false",
+        "href": "/errors",
+        "text": "Advanced",
+      },
+    ]
+  `);
+
+  const expandedLinks = [];
+
+  for (const link of nonExpandedLinks) {
+    const newDocsSection = (await getNavSections("https://pnpm.io/" + link.href)).find(
+      (it) => it.label === "Docs sidebar",
+    );
+    if (newDocsSection == null) throw new Error();
+    expandedLinks.push(...newDocsSection.links.filter((it) => it.expanded === undefined));
+  }
+
+  expect(expandedLinks).toMatchInlineSnapshot(`
+    [
+      {
+        "expanded": undefined,
+        "href": "/pnpm-cli",
+        "text": "pnpm CLI",
+      },
+      {
+        "expanded": undefined,
+        "href": "/configuring",
+        "text": "Configuring",
+      },
+      {
+        "expanded": undefined,
+        "href": "/filtering",
+        "text": "Filtering",
+      },
+      {
+        "expanded": undefined,
+        "href": "/scripts",
+        "text": "Scripts",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/add",
+        "text": "pnpm add <pkg>",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/install",
+        "text": "pnpm install",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/update",
+        "text": "pnpm update",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/remove",
+        "text": "pnpm remove",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/link",
+        "text": "pnpm link",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/unlink",
+        "text": "pnpm unlink",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/import",
+        "text": "pnpm import",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/rebuild",
+        "text": "pnpm rebuild",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/prune",
+        "text": "pnpm prune",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/fetch",
+        "text": "pnpm fetch",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/install-test",
+        "text": "pnpm install-test",
+      },
+      {
+        "expanded": undefined,
+        "href": "/cli/dedupe",
+        "text": "pnpm dedupe",
+      },
+      {
+        "expanded": undefined,
+        "href": "/package_json",
+        "text": "package.json",
+      },
+      {
+        "expanded": undefined,
+        "href": "/npmrc",
+        "text": ".npmrc",
+      },
+      {
+        "expanded": undefined,
+        "href": "/pnpm-workspace_yaml",
+        "text": "pnpm-workspace.yaml",
+      },
+      {
+        "expanded": undefined,
+        "href": "/pnpmfile",
+        "text": ".pnpmfile.cjs",
+      },
+      {
+        "expanded": undefined,
+        "href": "/workspaces",
+        "text": "Workspace",
+      },
+      {
+        "expanded": undefined,
+        "href": "/aliases",
+        "text": "Aliases",
+      },
+      {
+        "expanded": undefined,
+        "href": "/completion",
+        "text": "Command line tab-completion",
+      },
+      {
+        "expanded": undefined,
+        "href": "/using-changesets",
+        "text": "Using Changesets with pnpm",
+      },
+      {
+        "expanded": undefined,
+        "href": "/continuous-integration",
+        "text": "Continuous Integration",
+      },
+      {
+        "expanded": undefined,
+        "href": "/git",
+        "text": "Working with Git",
+      },
+      {
+        "expanded": undefined,
+        "href": "/docker",
+        "text": "Working with Docker",
+      },
+      {
+        "expanded": undefined,
+        "href": "/podman",
+        "text": "Working with Podman",
+      },
+      {
+        "expanded": undefined,
+        "href": "/errors",
+        "text": "Error Codes",
+      },
+      {
+        "expanded": undefined,
+        "href": "/logos",
+        "text": "Logos",
+      },
+      {
+        "expanded": undefined,
+        "href": "/limitations",
+        "text": "Limitations",
+      },
+      {
+        "expanded": undefined,
+        "href": "/symlinked-node-modules-structure",
+        "text": "Symlinked \`node_modules\` structure",
+      },
+      {
+        "expanded": undefined,
+        "href": "/how-peers-are-resolved",
+        "text": "How peers are resolved",
+      },
+      {
+        "expanded": undefined,
+        "href": "/uninstall",
+        "text": "Uninstalling pnpm",
+      },
+      {
+        "expanded": undefined,
+        "href": "/pnpm-vs-npm",
+        "text": "pnpm vs npm",
+      },
+    ]
+  `);
 });
+
+interface Link {
+  expanded?: "true" | "false";
+  href: string;
+  text: string;
+}
+
+async function getNavSections(url: string) {
+  const html = await fetchHtml(url);
+  const tree = unified().use(rehypeParse).parse(html);
+
+  // See: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/navigation_role
+  const elements = selectAll("nav:has(a), [role=navigation]:has(a)", tree);
+
+  return elements.map((node) => ({
+    label: node.properties?.ariaLabel,
+    links: selectAll("a", node).map(({ properties, children }) => ({
+      text: children.map((it) => toText(it)).join(" "),
+      expanded: properties?.ariaExpanded as "true" | "false" | undefined,
+      href: properties?.href as string,
+    })),
+  }));
+}
 
 async function fetchHtml(url: string) {
   let response = await fetch(url, { headers: { Accept: "text/html" } });
